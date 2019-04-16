@@ -1,6 +1,8 @@
 import React from 'react';
-import { Col, Table, Button, NavLink, Modal, ModalHeader, ModalBody, ModalFooter, Form, FormGroup, Label, Input,  } from 'reactstrap';
+import { Col, Table, Button,Badge,  NavLink, Modal, ModalHeader, ModalBody, ModalFooter, Form, FormGroup, Label, Input,  } from 'reactstrap';
 import axios from 'axios';
+
+import Header from './Header';
 
 class AllUsers extends React.Component {
     state = {
@@ -16,9 +18,9 @@ class AllUsers extends React.Component {
 
     componentDidMount(){
         let authToken = sessionStorage.getItem("authToken");
-        if(authToken == ''){
-            this.props.history.push('/login');
-        }
+        // if(authToken == ''){
+        //     this.props.history.push('/login');
+        // }
         axios.get('https://node-shop-rest.herokuapp.com/api/user/userlist', { headers: { "Authorization": `Bearer ${authToken}` } })
             .then(response => {
                 console.log(response.data.userDetails);
@@ -91,24 +93,49 @@ class AllUsers extends React.Component {
         });
     }
 
+    deleteUserHandler = (event, user) => {
+        console.log(this.state.authToken);
+        console.log(user._id);
+
+        axios.delete(`https://node-shop-rest.herokuapp.com/api/user/delete/${user._id}`,{
+            headers: {
+                "Authorization": `Bearer ${this.state.authToken}`,
+            }
+        }).then(response => {
+            if(response.data.message = "user deleted"){
+                window.location.reload();
+            }
+        })
+        .catch(function error(err){
+            console.log(err);
+        });
+    }
+
+
+    componentWillMount() {
+        if (sessionStorage.getItem("authToken") == '') {
+            this.props.history.push('/login');
+        }
+    }
     render() {
         let allUsers = (<tr>{this.state.loading}</tr>);
         
         if(this.state.allUsers.length != 0){
             allUsers = this.state.allUsers.map((user,index) => {
-                let userId = user._id;
                 return (
-                    <tr>
+                    <tr key={user._id}>
                         <th scope="row">{index + 1}</th>
                         <td>{user.name}</td>
                         <td>{user.email}</td>
                         <td>{user.phone}</td>
-                        <td><Button onClick={(event) => this.toggleModal(event, user)}>Edit</Button><NavLink href={`/delete-user/${user._id}`}>Delete</NavLink></td>
+                        <td><Badge color="info" onClick={(event) => this.toggleModal(event, user)}>Edit</Badge>{' '}<Badge color="danger" onClick={(event) => this.deleteUserHandler(event, user)}>Delete</Badge></td>
                     </tr>
                 );
             });
         }
         return (
+            <div>
+                <Header {...this.props}/>
             <Col md={{ size: 6, offset: 3 }}>
                 <div>
                     <Modal isOpen={this.state.modal} toggle={this.toggle} className={this.props.className}>
@@ -147,6 +174,7 @@ class AllUsers extends React.Component {
                     </tbody>
                 </Table>
             </Col>
+            </div>
         );
     }
 }

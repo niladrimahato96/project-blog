@@ -1,10 +1,15 @@
 import React from 'react';
-import { Col, Table, Button, NavLink } from 'reactstrap';
+import { Col } from 'reactstrap';
 
-const Home = () => (
-    <Col md={{ size: 5, offset: 5}}>
-        <h1 style={{marginTop: "25%"}}>HI!</h1>
-    </Col>
-)
+import Header from './Header';
+
+const Home = props => {
+    return (<div>
+        <Header {...props}/>
+        <Col md={{ size: 5, offset: 5 }}>
+            <h1 style={{ marginTop: "25%" }}>HI!</h1>
+        </Col>
+    </div>);
+}
 
 export default Home;
